@@ -1,0 +1,17 @@
+{
+  "font": "Segoe UI",
+  "view": {"stroke": "transparent"},
+  "axis": {
+    "labelColor": "#605E5C",
+    "titleColor": "#605E5C",
+    "labelFontSize": 11,
+    "titleFontSize": 12,
+    "titleFontWeight": "normal",
+    "domainColor": "#C8C6C4",
+    "tickColor": "#C8C6C4",
+    "gridColor": "#EDEBE9"
+  },
+  "legend": {"labelColor": "#605E5C", "titleColor": "#605E5C", "labelFontSize": 11, "orient": "top"},
+  "text": {"color": "#605E5C", "fontSize": 11},
+  "range": {"category": {"scheme": "pbiColorNominal"}}
+}

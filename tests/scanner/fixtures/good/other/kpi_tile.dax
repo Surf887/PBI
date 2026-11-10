@@ -1,0 +1,15 @@
+KPI Tile HTML =
+VAR _Name = SELECTEDVALUE ( 'Region'[Region], "All regions" )
+VAR _Safe =
+    SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE (
+        _Name, "&", "&amp;" ), "<", "&lt;" ), ">", "&gt;" ), "'", "&apos;" ), """", "&quot;" )
+VAR _Act = [Sales Amount]
+VAR _Gap = DIVIDE ( _Act - [Sales Target], [Sales Target] )
+VAR _Ink = IF ( _Gap >= 0, "#107C10", "#A4262C" )
+RETURN
+    "<div style='font-family:Segoe UI,sans-serif;padding:8px 12px;border-left:4px solid " & _Ink & "'>"
+        & "<div style='font-size:12px;color:#605E5C'>" & _Safe & "</div>"
+        & "<div style='font-size:24px;font-weight:600;color:#252423'>" & FORMAT ( _Act, "#,0" ) & "</div>"
+        & "<div style='font-size:12px;color:" & _Ink & "'>"
+        & FORMAT ( _Gap, "+0.0%;-0.0%;0.0%" ) & " vs target</div>"
+        & "</div>"

@@ -1,0 +1,1 @@
+<svg xmlns='http://www.w3.org/2000/svg' onload='alert(1)'><image href='https://evil.example.com/p.png?v=42'/><foreignObject/><rect fill='%23FF0000'/></svg>

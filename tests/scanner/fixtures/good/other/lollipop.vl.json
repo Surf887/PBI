@@ -1,0 +1,105 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "description": "Ranked lollipop. Fields: Category (column), Sales (measure). Works with tooltips, cross-filtering and cross-highlighting.",
+  "data": {
+    "name": "dataset"
+  },
+  "width": "container",
+  "height": "container",
+  "autosize": {
+    "type": "fit",
+    "contains": "padding"
+  },
+  "transform": [
+    {
+      "calculate": "datum['Sales__highlightStatus'] == 'off' || datum['__selected__'] == 'off' ? 0.3 : 1",
+      "as": "__opacity"
+    }
+  ],
+  "encoding": {
+    "y": {
+      "field": "Category",
+      "type": "nominal",
+      "sort": {
+        "field": "Sales",
+        "op": "max",
+        "order": "descending"
+      },
+      "title": null,
+      "axis": {
+        "labelLimit": 160,
+        "ticks": false,
+        "domain": false
+      }
+    },
+    "x": {
+      "field": "Sales",
+      "type": "quantitative",
+      "title": null,
+      "axis": {
+        "format": "#,0",
+        "formatType": "pbiFormat",
+        "grid": true,
+        "tickCount": 4
+      }
+    },
+    "opacity": {
+      "field": "__opacity",
+      "type": "quantitative",
+      "scale": null,
+      "legend": null
+    },
+    "tooltip": [
+      {
+        "field": "Category",
+        "type": "nominal"
+      },
+      {
+        "field": "Sales",
+        "type": "quantitative",
+        "format": "#,0",
+        "formatType": "pbiFormat"
+      }
+    ]
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "rule",
+        "strokeWidth": 2,
+        "color": "#C8C6C4"
+      },
+      "encoding": {
+        "x2": {
+          "datum": 0
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "circle",
+        "size": 140,
+        "color": {
+          "expr": "pbiColor(0)"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "dx": 10,
+        "fontSize": 11
+      },
+      "encoding": {
+        "text": {
+          "field": "Sales",
+          "type": "quantitative",
+          "format": "#,0",
+          "formatType": "pbiFormat"
+        }
+      }
+    }
+  ]
+}

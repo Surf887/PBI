@@ -1,0 +1,66 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "usermeta": {
+    "deneb": {"build": "2.0.1.0", "metaVersion": 2, "provider": "vegaLite", "providerVersion": "6.4.3"},
+    "information": {
+      "name": "Ranked lollipop",
+      "description": "Ranks a category by one measure. Supports tooltips, cross-filtering and cross-highlighting.",
+      "author": "Your team",
+      "uuid": "6f0d8a52-3c1e-4b7a-9d2f-1e5c7b9a4d30",
+      "generated": "2026-11-09T00:00:00.000Z"
+    },
+    "datasets": {
+      "dataset": [
+        {"key": "__dataset.0__", "name": "Category", "description": "Column to rank (one row per item)", "kind": "column", "type": "text"},
+        {"key": "__dataset.1__", "name": "Value", "description": "Measure to rank by", "kind": "measure", "type": "numeric"}
+      ]
+    },
+    "interactivity": {
+      "tooltip": true,
+      "contextMenu": true,
+      "selection": true,
+      "selectionMode": "simple",
+      "highlight": true,
+      "dataPointLimit": 50
+    },
+    "config": "{\"font\":\"Segoe UI\",\"view\":{\"stroke\":\"transparent\"},\"axis\":{\"labelColor\":\"#605E5C\",\"gridColor\":\"#EDEBE9\",\"domainColor\":\"#C8C6C4\",\"tickColor\":\"#C8C6C4\"},\"text\":{\"color\":\"#605E5C\",\"fontSize\":11}}"
+  },
+  "data": {"name": "dataset"},
+  "width": "container",
+  "height": "container",
+  "autosize": {"type": "fit", "contains": "padding"},
+  "transform": [
+    {
+      "calculate": "datum['__dataset.1____highlightStatus'] == 'off' || datum['__selected__'] == 'off' ? 0.3 : 1",
+      "as": "__opacity"
+    }
+  ],
+  "encoding": {
+    "y": {
+      "field": "__dataset.0__",
+      "type": "nominal",
+      "sort": {"field": "__dataset.1__", "op": "max", "order": "descending"},
+      "title": null,
+      "axis": {"labelLimit": 160, "ticks": false, "domain": false}
+    },
+    "x": {
+      "field": "__dataset.1__",
+      "type": "quantitative",
+      "title": null,
+      "axis": {"format": "#,0", "formatType": "pbiFormat", "tickCount": 4}
+    },
+    "opacity": {"field": "__opacity", "type": "quantitative", "scale": null, "legend": null},
+    "tooltip": [
+      {"field": "__dataset.0__", "type": "nominal"},
+      {"field": "__dataset.1__", "type": "quantitative", "format": "#,0", "formatType": "pbiFormat"}
+    ]
+  },
+  "layer": [
+    {"mark": {"type": "rule", "strokeWidth": 2, "color": "#C8C6C4"}, "encoding": {"x2": {"datum": 0}}},
+    {"mark": {"type": "circle", "size": 140, "color": {"expr": "pbiColor(0)"}}},
+    {
+      "mark": {"type": "text", "align": "left", "baseline": "middle", "dx": 10},
+      "encoding": {"text": {"field": "__dataset.1__", "type": "quantitative", "format": "#,0", "formatType": "pbiFormat"}}
+    }
+  ]
+}

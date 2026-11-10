@@ -1,0 +1,5 @@
+createOrReplace
+
+	function SvgEscapeText = ( txt : STRING ) =>
+		SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE ( SUBSTITUTE (
+			txt, "&", "&amp;" ), "<", "&lt;" ), ">", "&gt;" ), "'", "&apos;" ), """", "&quot;" )

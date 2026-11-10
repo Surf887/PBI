@@ -1,0 +1,46 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "3f9a1c7e5b2d4a6c8e01",
+  "position": {"x": 24, "y": 96, "z": 1000, "height": 320, "width": 560, "tabOrder": 1000},
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [{
+            "field": {"Column": {"Expression": {"SourceRef": {"Entity": "Region"}}, "Property": "Region"}},
+            "queryRef": "Region.Region",
+            "nativeQueryRef": "Region",
+            "active": true
+          }]
+        },
+        "Y": {
+          "projections": [{
+            "field": {"Measure": {"Expression": {"SourceRef": {"Entity": "Sales"}}, "Property": "Sales Amount"}},
+            "queryRef": "Sales.Sales Amount",
+            "nativeQueryRef": "Sales Amount"
+          }]
+        }
+      },
+      "sortDefinition": {
+        "sort": [{
+          "field": {"Measure": {"Expression": {"SourceRef": {"Entity": "Sales"}}, "Property": "Sales Amount"}},
+          "direction": "Descending"
+        }],
+        "isDefaultSort": true
+      }
+    },
+    "objects": {
+      "dataPoint": [{"properties": {"defaultColor": {"solid": {"color": {"expr": {"ThemeDataColor": {"ColorId": 0, "Percent": 0}}}}}}}],
+      "labels": [{"properties": {"show": {"expr": {"Literal": {"Value": "true"}}}}}],
+      "valueAxis": [{"properties": {"start": {"expr": {"Literal": {"Value": "0D"}}}}}]
+    },
+    "visualContainerObjects": {
+      "title": [{"properties": {
+        "show": {"expr": {"Literal": {"Value": "true"}}},
+        "text": {"expr": {"Literal": {"Value": "'East leads; West is 52% below the leader'"}}}
+      }}]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

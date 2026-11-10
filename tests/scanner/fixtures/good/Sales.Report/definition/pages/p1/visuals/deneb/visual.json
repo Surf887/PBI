@@ -1,0 +1,123 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "a9f01fbf4754050bd56c",
+  "position": {
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "height": 320,
+    "width": 520,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "deneb7E15AEF80B9E4D4F8E12924291ECE89A",
+    "query": {
+      "queryState": {
+        "dataset": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Region"
+                    }
+                  },
+                  "Property": "Category"
+                }
+              },
+              "queryRef": "Region.Category",
+              "nativeQueryRef": "Category"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Sales"
+                    }
+                  },
+                  "Property": "Sales"
+                }
+              },
+              "queryRef": "Sales.Sales",
+              "nativeQueryRef": "Sales"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "vega": [
+        {
+          "properties": {
+            "jsonSpec": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{\"description\":\"Ranked lollipop. Fields: Category (column), Sales (measure). Works with tooltips, cross-filtering and cross-highlighting.\",\"data\":{\"name\":\"dataset\"},\"width\":\"container\",\"height\":\"container\",\"autosize\":{\"type\":\"fit\",\"contains\":\"padding\"},\"transform\":[{\"calculate\":\"datum[''Sales__highlightStatus''] == ''off'' || datum[''__selected__''] == ''off'' ? 0.3 : 1\",\"as\":\"__opacity\"}],\"encoding\":{\"y\":{\"field\":\"Category\",\"type\":\"nominal\",\"sort\":{\"field\":\"Sales\",\"op\":\"max\",\"order\":\"descending\"},\"title\":null,\"axis\":{\"labelLimit\":160,\"ticks\":false,\"domain\":false}},\"x\":{\"field\":\"Sales\",\"type\":\"quantitative\",\"title\":null,\"axis\":{\"format\":\"#,0\",\"formatType\":\"pbiFormat\",\"grid\":true,\"tickCount\":4}},\"opacity\":{\"field\":\"__opacity\",\"type\":\"quantitative\",\"scale\":null,\"legend\":null},\"tooltip\":[{\"field\":\"Category\",\"type\":\"nominal\"},{\"field\":\"Sales\",\"type\":\"quantitative\",\"format\":\"#,0\",\"formatType\":\"pbiFormat\"}]},\"layer\":[{\"mark\":{\"type\":\"rule\",\"strokeWidth\":2,\"color\":\"#C8C6C4\"},\"encoding\":{\"x2\":{\"datum\":0}}},{\"mark\":{\"type\":\"circle\",\"size\":140,\"color\":{\"expr\":\"pbiColor(0)\"}}},{\"mark\":{\"type\":\"text\",\"align\":\"left\",\"baseline\":\"middle\",\"dx\":10,\"fontSize\":11},\"encoding\":{\"text\":{\"field\":\"Sales\",\"type\":\"quantitative\",\"format\":\"#,0\",\"formatType\":\"pbiFormat\"}}}]}'"
+                }
+              }
+            },
+            "jsonConfig": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{\"font\":\"Segoe UI\",\"view\":{\"stroke\":\"transparent\"},\"axis\":{\"labelColor\":\"#605E5C\",\"titleColor\":\"#605E5C\",\"labelFontSize\":11,\"titleFontSize\":12,\"titleFontWeight\":\"normal\",\"domainColor\":\"#C8C6C4\",\"tickColor\":\"#C8C6C4\",\"gridColor\":\"#EDEBE9\"},\"legend\":{\"labelColor\":\"#605E5C\",\"titleColor\":\"#605E5C\",\"labelFontSize\":11,\"orient\":\"top\"},\"text\":{\"color\":\"#605E5C\",\"fontSize\":11},\"range\":{\"category\":{\"scheme\":\"pbiColorNominal\"}}}'"
+                }
+              }
+            },
+            "provider": {
+              "expr": {
+                "Literal": {
+                  "Value": "'vegaLite'"
+                }
+              }
+            },
+            "renderMode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'svg'"
+                }
+              }
+            },
+            "enableTooltips": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableContextMenu": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableSelection": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableHighlight": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "selectionMaxDataPoints": {
+              "expr": {
+                "Literal": {
+                  "Value": "50D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

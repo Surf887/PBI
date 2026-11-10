@@ -1,0 +1,114 @@
+table Sales
+
+	measure 'Bullet SVG' =
+			VAR _Actual = [Sales Amount]
+			VAR _Target = [Sales Target]
+			VAR _Max =
+			    MAXX ( ALLSELECTED ( 'Region'[Region] ), MAX ( [Sales Amount], [Sales Target] ) ) * 1.1
+			VAR _W = 120
+			VAR _H = 24
+			VAR _ActW = MAX ( 0, COALESCE ( DIVIDE ( _Actual, _Max ), 0 ) ) * _W
+			VAR _TgtX = COALESCE ( DIVIDE ( _Target, _Max ), 0 ) * _W
+			VAR _Color = IF ( _Actual >= _Target, "#1AAB40", "#D64554" )
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='" & _W & "' height='" & _H
+			        & "' viewBox='0 0 " & _W & " " & _H & "'>"
+			        & "<rect x='0' y='4' width='" & _W & "' height='16' fill='#F3F2F1'/>"
+			        & "<rect x='0' y='8' width='" & FORMAT ( _ActW, "0.0", "en-US" )
+			        & "' height='8' fill='" & _Color & "'/>"
+			        & IF (
+			            NOT ISBLANK ( _Target ),
+			            "<rect x='" & FORMAT ( MAX ( 0, _TgtX - 1 ), "0.0", "en-US" )
+			                & "' y='2' width='2' height='20' fill='#252423'/>"
+			        )
+			        & "</svg>"
+			RETURN
+			    IF (
+			        ISINSCOPE ( 'Region'[Region] ) && NOT ISBLANK ( _Actual ),
+			        "data:image/svg+xml;utf8," & _Svg
+			    )
+		dataCategory: ImageUrl
+
+	measure 'Progress SVG' =
+			VAR _Pct = DIVIDE ( [Sales Amount], [Sales Target] )
+			VAR _BarMax = 140
+			VAR _W = _BarMax + 44
+			VAR _Fill = MIN ( MAX ( COALESCE ( _Pct, 0 ), 0 ), 1 ) * _BarMax
+			VAR _Color = IF ( _Pct >= 1, "#1AAB40", "#118DFF" )
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='" & _W & "' height='20' viewBox='0 0 " & _W & " 20'>"
+			        & "<rect x='0' y='5' width='" & _BarMax & "' height='10' rx='5' fill='#EDEBE9'/>"
+			        & "<rect x='0' y='5' width='" & FORMAT ( _Fill, "0.0", "en-US" )
+			        & "' height='10' rx='5' fill='" & _Color & "'/>"
+			        & "<text x='" & _BarMax + 6 & "' y='14.5' font-family='Segoe UI, sans-serif' font-size='11' fill='#252423'>"
+			        & FORMAT ( _Pct, "0%", "en-US" ) & "</text>"
+			        & "</svg>"
+			RETURN
+			    IF ( NOT ISBLANK ( _Pct ), "data:image/svg+xml;utf8," & _Svg )
+		dataCategory: ImageUrl
+
+	measure 'Sparkline SVG' =
+			VAR _W = 120
+			VAR _H = 28
+			VAR _Pad = 3
+			VAR _End = MAX ( 'Date'[Date] )
+			VAR _Points =
+			    FILTER (
+			        ADDCOLUMNS (
+			            CALCULATETABLE (
+			                VALUES ( 'Date'[Month Start] ),
+			                DATESINPERIOD ( 'Date'[Date], _End, -12, MONTH ),
+			                REMOVEFILTERS ( 'Date' )
+			            ),
+			            "@v",
+			                VAR _m = 'Date'[Month Start]
+			                RETURN
+			                    CALCULATE ( [Sales Amount], REMOVEFILTERS ( 'Date' ), 'Date'[Month Start] = _m )
+			        ),
+			        NOT ISBLANK ( [@v] )
+			    )
+			VAR _MinV = MINX ( _Points, [@v] )
+			VAR _MaxV = MAXX ( _Points, [@v] )
+			VAR _MinD = MINX ( _Points, 'Date'[Month Start] )
+			VAR _Span = DATEDIFF ( _MinD, MAXX ( _Points, 'Date'[Month Start] ), DAY )
+			VAR _Coords =
+			    ADDCOLUMNS (
+			        _Points,
+			        "@x", _Pad + COALESCE ( DIVIDE ( DATEDIFF ( _MinD, 'Date'[Month Start], DAY ), _Span ), 0 ) * ( _W - 2 * _Pad ),
+			        "@y", _H - _Pad - COALESCE ( DIVIDE ( [@v] - _MinV, _MaxV - _MinV ), 0.5 ) * ( _H - 2 * _Pad )
+			    )
+			VAR _Line =
+			    CONCATENATEX (
+			        _Coords,
+			        FORMAT ( [@x], "0.0", "en-US" ) & "," & FORMAT ( [@y], "0.0", "en-US" ),
+			        " ",
+			        'Date'[Month Start], ASC
+			    )
+			VAR _Last = TOPN ( 1, _Coords, 'Date'[Month Start], DESC )
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='" & _W & "' height='" & _H
+			        & "' viewBox='0 0 " & _W & " " & _H & "'>"
+			        & "<polyline points='" & _Line
+			        & "' fill='none' stroke='#118DFF' stroke-width='1.5' stroke-linejoin='round' stroke-linecap='round'/>"
+			        & "<circle cx='" & FORMAT ( MAXX ( _Last, [@x] ), "0.0", "en-US" )
+			        & "' cy='" & FORMAT ( MAXX ( _Last, [@y] ), "0.0", "en-US" ) & "' r='2.5' fill='#118DFF'/>"
+			        & "</svg>"
+			RETURN
+			    IF ( COUNTROWS ( _Points ) >= 2, "data:image/svg+xml;utf8," & _Svg )
+		dataCategory: ImageUrl
+
+	measure 'Status SVG' =
+			VAR _Gap = DIVIDE ( [Sales Amount] - [Sales Target], [Sales Target] )
+			VAR _Status =
+			    SWITCH ( TRUE (), ISBLANK ( _Gap ), BLANK (), _Gap >= 0, "On track", _Gap >= -0.05, "At risk", "Behind" )
+			VAR _Fill = SWITCH ( _Status, "On track", "#DFF6DD", "At risk", "#FFF4CE", "#FDE7E9" )
+			VAR _Ink = SWITCH ( _Status, "On track", "#107C10", "At risk", "#8A6D00", "#A4262C" )
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='84' height='22' viewBox='0 0 84 22'>"
+			        & "<rect x='0.5' y='0.5' width='83' height='21' rx='10.5' fill='" & _Fill & "' stroke='" & _Ink & "'/>"
+			        & "<text x='42' y='15' text-anchor='middle' font-family='Segoe UI, sans-serif' font-size='11' font-weight='600' fill='"
+			        & _Ink & "'>" & _Status & "</text>"
+			        & "</svg>"
+			RETURN
+			    IF ( NOT ISBLANK ( _Status ), "data:image/svg+xml;utf8," & _Svg )
+		dataCategory: ImageUrl

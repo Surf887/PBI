@@ -1,0 +1,1 @@
+{"visual": {"objects": {"vega": [{"properties": {"jsonSpec": {"expr": {"Literal": {"Value": "'{\"data\": {\"url\": \"data/sales.csv\"}, \"mark\": \"bar\"}'"}}}}}]}}}

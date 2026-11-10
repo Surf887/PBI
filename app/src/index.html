@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="{{CSP}}">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Power BI Visual Builder (offline)</title>
+<style>{{STYLE}}</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>Power BI Visual Builder</h1>
+    <p class="tagline"><span class="pill">Offline</span><span class="pill">No AI</span><span class="pill">Nothing leaves this page</span></p>
+  </div>
+  <p class="privacy">This file runs only in your browser. Its security policy blocks every network connection, so field names and project files stay on this PC. It reads and writes only a folder you pick.</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button type="button" role="tab" id="tab-recommend" aria-controls="p-recommend" aria-selected="true">Recommend</button>
+  <button type="button" role="tab" id="tab-svg" aria-controls="p-svg" aria-selected="false" tabindex="-1">SVG measures</button>
+  <button type="button" role="tab" id="tab-deneb" aria-controls="p-deneb" aria-selected="false" tabindex="-1">Deneb</button>
+  <button type="button" role="tab" id="tab-native" aria-controls="p-native" aria-selected="false" tabindex="-1">Native visual</button>
+  <button type="button" role="tab" id="tab-htmlpy" aria-controls="p-htmlpy" aria-selected="false" tabindex="-1">HTML &amp; Python</button>
+  <button type="button" role="tab" id="tab-sdk" aria-controls="p-sdk" aria-selected="false" tabindex="-1">Custom visual</button>
+  <button type="button" role="tab" id="tab-scan" aria-controls="p-scan" aria-selected="false" tabindex="-1">Scan</button>
+  <button type="button" role="tab" id="tab-rules" aria-controls="p-rules" aria-selected="false" tabindex="-1">Rules</button>
+</nav>
+
+<section id="project" class="project" aria-labelledby="project-h" hidden>
+  <div class="project-head">
+    <h2 id="project-h">Write into a PBIP project</h2>
+    <button type="button" id="project-open" class="btn">Open PBIP folder…</button>
+  </div>
+  <p id="project-help" class="note">Pick the folder that contains your <code>.pbip</code> file. The report must be saved in the PBIR format.</p>
+  <p id="project-unsupported" class="note warn" hidden>This browser does not allow folder access. Use Microsoft Edge or Google Chrome, or use the Download buttons instead.</p>
+  <div id="project-body" hidden>
+    <div class="row">
+      <label class="grow">Report <select id="project-report"></select></label>
+      <label class="grow">Page <select id="project-page"></select></label>
+    </div>
+    <p id="project-schema" class="note"></p>
+    <fieldset class="confirm">
+      <legend>Before writing</legend>
+      <label class="check"><input type="checkbox" id="confirm-desktop"> Power BI Desktop is closed, or has no unsaved changes</label>
+      <label class="check"><input type="checkbox" id="confirm-backup"> The project is in Git, or I rely on this app's backup of <code>report.json</code></label>
+    </fieldset>
+  </div>
+  <div id="project-status" class="status" role="status" aria-live="polite"></div>
+  <div id="project-result" class="result" hidden>
+    <ul id="project-result-list"></ul>
+    <button type="button" id="project-undo" class="btn ghost">Undo this change</button>
+  </div>
+</section>
+
+<main>
+  <!-- Recommend -->
+  <section id="p-recommend" role="tabpanel" aria-labelledby="tab-recommend">
+    <div class="cols">
+      <form id="f-recommend" class="card form" autocomplete="off">
+        <h2>What should the visual do?</h2>
+        <label>Question it answers <select name="task"></select></label>
+        <label>Where it goes <select name="place"></select></label>
+        <fieldset>
+          <legend>Needs</legend>
+          <label class="check"><input type="checkbox" name="interactive"> Tooltips or clicks on individual marks</label>
+          <label class="check"><input type="checkbox" name="manyItems"> Many items (more than about 15)</label>
+          <label class="check"><input type="checkbox" name="reuse"> The same custom chart in many reports</label>
+        </fieldset>
+        <fieldset>
+          <legend>Allowed in your tenant</legend>
+          <label class="check"><input type="checkbox" name="deneb" checked> Deneb (certified visual)</label>
+          <label class="check"><input type="checkbox" name="html" checked> HTML Content Secure (certified visual)</label>
+          <label class="check"><input type="checkbox" name="orgVisuals"> Publishing our own visuals to the organizational store</label>
+          <label class="check"><input type="checkbox" name="python"> Python or R visuals</label>
+        </fieldset>
+      </form>
+      <div class="card result-card" id="recommend-out" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- SVG measures -->
+  <section id="p-svg" role="tabpanel" aria-labelledby="tab-svg" hidden>
+    <div class="cols">
+      <form id="f-svg" class="card form" autocomplete="off">
+        <h2>SVG measure</h2>
+        <p class="hint">A DAX measure that draws a small chart inside a table, matrix, new card or image visual.</p>
+        <label>Template
+          <select name="template">
+            <option value="bullet">Bullet: actual vs target</option>
+            <option value="progress">Progress bar with label</option>
+            <option value="sparkline">Sparkline: rolling trend</option>
+            <option value="status">Status pill (text + colour)</option>
+            <option value="udf">Escape text from data (DAX function)</option>
+          </select>
+        </label>
+        <fieldset data-for="bullet">
+          <legend>Bullet</legend>
+          <label>Measure name <input name="bullet.name"></label>
+          <label>Actual measure <input name="bullet.actual"></label>
+          <label>Target measure <input name="bullet.target"></label>
+          <label>Row field (the table's row column) <input name="bullet.row"></label>
+          <div class="row">
+            <label>Width (px) <input name="bullet.width" type="number" min="40" max="400"></label>
+            <label>Target met <input name="bullet.good" type="color"></label>
+            <label>Below target <input name="bullet.bad" type="color"></label>
+          </div>
+        </fieldset>
+        <fieldset data-for="progress" hidden>
+          <legend>Progress bar</legend>
+          <label>Measure name <input name="progress.name"></label>
+          <label>Actual measure <input name="progress.actual"></label>
+          <label>Target measure <input name="progress.target"></label>
+          <div class="row">
+            <label>Bar width (px) <input name="progress.barWidth" type="number" min="40" max="400"></label>
+            <label>Target reached <input name="progress.done" type="color"></label>
+            <label>Below target <input name="progress.open" type="color"></label>
+          </div>
+        </fieldset>
+        <fieldset data-for="sparkline" hidden>
+          <legend>Sparkline</legend>
+          <label>Measure name <input name="sparkline.name"></label>
+          <label>Value measure <input name="sparkline.value"></label>
+          <label>Date table (marked as date table) <input name="sparkline.dateTable"></label>
+          <div class="row">
+            <label>Date column <input name="sparkline.dateColumn"></label>
+            <label>Month start column <input name="sparkline.monthColumn"></label>
+          </div>
+          <div class="row">
+            <label>Months <input name="sparkline.months" type="number" min="2" max="36"></label>
+            <label>Width <input name="sparkline.width" type="number" min="40" max="400"></label>
+            <label>Height <input name="sparkline.height" type="number" min="12" max="80"></label>
+            <label>Line <input name="sparkline.color" type="color"></label>
+          </div>
+        </fieldset>
+        <fieldset data-for="status" hidden>
+          <legend>Status pill</legend>
+          <label>Measure name <input name="status.name"></label>
+          <label>Actual measure <input name="status.actual"></label>
+          <label>Target measure <input name="status.target"></label>
+          <label>"At risk" band below target (%) <input name="status.atRiskPct" type="number" min="0.5" max="50" step="0.5"></label>
+          <div class="row">
+            <label>On-track label <input name="status.onTrack" maxlength="12"></label>
+            <label>At-risk label <input name="status.atRisk" maxlength="12"></label>
+            <label>Behind label <input name="status.behind" maxlength="12"></label>
+          </div>
+        </fieldset>
+        <p class="hint" data-for="udf" hidden>No inputs needed. Add the function to the model once, then wrap any text that comes from data before it goes into an SVG, for example <code>SvgEscapeText ( 'Product'[Name] )</code>.</p>
+        <p class="error" role="alert" hidden></p>
+      </form>
+      <div class="outputs">
+        <div class="out" id="o-svg" data-title="DAX measure" data-file="svg-measure.dax"></div>
+        <div class="card steps"><h3>How to use it</h3><ol id="steps-svg"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deneb -->
+  <section id="p-deneb" role="tabpanel" aria-labelledby="tab-deneb" hidden>
+    <div class="cols">
+      <form id="f-deneb" class="card form" autocomplete="off">
+        <h2>Deneb chart</h2>
+        <p class="hint">For the certified Deneb visual (Vega-Lite 6). Write fields as <code>Table[Field]</code>; measures use their home table.</p>
+        <label>Chart
+          <select name="chart">
+            <option value="lollipop">Ranked lollipop</option>
+            <option value="variance">Actual vs prior year with variance % (IBCS style)</option>
+          </select>
+        </label>
+        <label>Category column <input name="category"></label>
+        <label data-for="lollipop">Value measure <input name="value"></label>
+        <label data-for="variance" hidden>Actual measure <input name="actual"></label>
+        <label data-for="variance" hidden>Prior-year or plan measure <input name="prior"></label>
+        <label>Number format <select name="format"></select></label>
+        <fieldset>
+          <legend>Interactivity</legend>
+          <label class="check"><input type="checkbox" name="tooltips" checked> Tooltips</label>
+          <label class="check"><input type="checkbox" name="selection" checked> Cross-filtering (click a mark)</label>
+          <label class="check"><input type="checkbox" name="highlight" checked> Cross-highlighting</label>
+        </fieldset>
+        <details>
+          <summary>PBIR options</summary>
+          <div class="row">
+            <label>Width <input name="width" type="number" min="80" max="1920" value="520"></label>
+            <label>Height <input name="height" type="number" min="80" max="1080" value="320"></label>
+          </div>
+          <label>Schema version for downloads <select name="schema"></select></label>
+          <fieldset>
+            <legend>Where Deneb comes from</legend>
+            <label class="check"><input type="radio" name="source" value="appsource" checked> AppSource (certified)</label>
+            <label class="check"><input type="radio" name="source" value="orgstore"> Organizational store</label>
+          </fieldset>
+        </details>
+        <p class="error" role="alert" hidden></p>
+      </form>
+      <div class="outputs">
+        <div class="out" id="o-deneb-spec" data-title="Specification (paste into Deneb)" data-file="deneb-spec.json"></div>
+        <div class="out" id="o-deneb-config" data-title="Config (Config tab)" data-file="deneb-config.json"></div>
+        <div class="out" id="o-deneb-template" data-title="Deneb template (shareable: no field names)" data-file="deneb-template.json" data-collapsed="true"></div>
+        <div class="out" id="o-deneb-visual" data-title="PBIR visual.json" data-file="visual.json" data-write="deneb" data-collapsed="true"></div>
+        <div class="card steps"><h3>How to use it</h3><ol id="steps-deneb"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Native visual -->
+  <section id="p-native" role="tabpanel" aria-labelledby="tab-native" hidden>
+    <div class="cols">
+      <form id="f-native" class="card form" autocomplete="off">
+        <h2>Native visual (PBIR)</h2>
+        <p class="hint">Builds a <code>visual.json</code> for a built-in visual. One field per line, written as <code>Table[Field]</code>.</p>
+        <label>Visual type <select name="visualType"></select></label>
+        <div data-shape="chart">
+          <label>Axis (one column) <input name="category"></label>
+          <label>Values (measures) <textarea name="values" rows="2"></textarea></label>
+          <label>Legend (optional column; single measure only) <input name="series"></label>
+          <label>Sort
+            <select name="sort">
+              <option value="value">By the first measure, largest first</option>
+              <option value="category">By the axis, A to Z</option>
+              <option value="none">Desktop default</option>
+            </select>
+          </label>
+        </div>
+        <div data-shape="table" hidden>
+          <label>Columns (left side) <textarea name="tableColumns" rows="2"></textarea></label>
+          <label>Measures (right side) <textarea name="tableValues" rows="2"></textarea></label>
+        </div>
+        <div data-shape="matrix" hidden>
+          <label>Rows <textarea name="rows" rows="2"></textarea></label>
+          <label>Columns (optional) <textarea name="matrixColumns" rows="1"></textarea></label>
+          <label>Values (measures) <textarea name="matrixValues" rows="2"></textarea></label>
+        </div>
+        <div data-shape="card" hidden>
+          <label>Measures <textarea name="cardValues" rows="2"></textarea></label>
+        </div>
+        <div data-shape="table matrix" class="row" hidden>
+          <label>Image height (SVG measures) <input name="imageHeight" type="number" min="8" max="400"></label>
+          <label>Image width <input name="imageWidth" type="number" min="8" max="800"></label>
+        </div>
+        <label>Title (state the takeaway) <input name="title" maxlength="100"></label>
+        <details>
+          <summary>PBIR options</summary>
+          <div class="row">
+            <label>Width <input name="width" type="number" min="80" max="1920" value="560"></label>
+            <label>Height <input name="height" type="number" min="80" max="1080" value="320"></label>
+          </div>
+          <label>Schema version for downloads <select name="schema"></select></label>
+        </details>
+        <p class="error" role="alert" hidden></p>
+      </form>
+      <div class="outputs">
+        <div class="out" id="o-native" data-title="PBIR visual.json" data-file="visual.json" data-write="native"></div>
+        <div class="card steps"><h3>How to use it</h3><ol id="steps-native"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HTML Content Secure and Python -->
+  <section id="p-htmlpy" role="tabpanel" aria-labelledby="tab-htmlpy" hidden>
+    <div class="cols">
+      <form id="f-htmlpy" class="card form" autocomplete="off">
+        <h2>HTML tile or Python visual</h2>
+        <label>Output
+          <select name="kind">
+            <option value="html">KPI tile for HTML Content Secure</option>
+            <option value="python">Python box plot (last resort)</option>
+          </select>
+        </label>
+        <fieldset data-for="html">
+          <legend>KPI tile</legend>
+          <label>Measure name <input name="html.name"></label>
+          <label>Label field (shows the selected item) <input name="html.label"></label>
+          <label>Text when several items are selected <input name="html.allText" maxlength="40"></label>
+          <label>Actual measure <input name="html.actual"></label>
+          <label>Target measure <input name="html.target"></label>
+          <label>Number format <select name="html.format"></select></label>
+        </fieldset>
+        <fieldset data-for="python" hidden>
+          <legend>Python box plot</legend>
+          <label>Category column (as named in the visual) <input name="python.category"></label>
+          <label>Value column <input name="python.value"></label>
+          <label>Axis title (optional) <input name="python.xLabel" maxlength="40"></label>
+        </fieldset>
+        <p class="error" role="alert" hidden></p>
+      </form>
+      <div class="outputs">
+        <div class="out" id="o-htmlpy" data-title="Output" data-file="kpi-tile.dax"></div>
+        <div class="card steps"><h3>How to use it</h3><ol id="steps-htmlpy"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Custom visual (SDK) -->
+  <section id="p-sdk" role="tabpanel" aria-labelledby="tab-sdk" hidden>
+    <div class="card intro">
+      <h2>Custom visual with the Power BI Visuals SDK</h2>
+      <p>Only for a reusable visual needed in many reports, with an owner, a code review and a route into your organizational store. Installing Node.js and the SDK needs your IT department's approval.</p>
+      <ul>
+        <li>No network calls, <code>eval</code>, string timers or <code>innerHTML</code>; keep <code>privileges</code> empty.</li>
+        <li>Support rendering events, selection, context menu, tooltips, keyboard focus, high contrast and a landing page.</li>
+        <li>Package with <code>--certification-audit</code> and give the reviewed <code>.pbiviz</code> to your Power BI admin for the organizational store.</li>
+      </ul>
+    </div>
+    <div class="out" id="o-sdk-commands" data-title="Commands (pinned versions)" data-file="commands.txt" data-noscan="true"></div>
+    <div class="out" id="o-sdk-caps" data-title="capabilities.json essentials (merge into the scaffold's file)" data-file="capabilities-essentials.json"></div>
+    <div class="out" id="o-sdk-visual" data-title="src/visual.ts skeleton" data-file="visual.ts" data-collapsed="true"></div>
+  </section>
+
+  <!-- Scan -->
+  <section id="p-scan" role="tabpanel" aria-labelledby="tab-scan" hidden>
+    <div class="card">
+      <h2>Scan files for unsafe content</h2>
+      <p>Checks for external URLs, scripts and event handlers, remote CSS, dynamic code, network privileges and pre-encoded colours in DAX: the same rules as the skill's scanner. Point it at a PBIP project, a <code>pbiviz</code> project or single files. Files are only read.</p>
+      <div class="row">
+        <button type="button" id="scan-folder" class="btn">Scan a folder…</button>
+        <button type="button" id="scan-files" class="btn ghost">Scan files…</button>
+        <input type="file" id="scan-dir-input" webkitdirectory hidden>
+        <input type="file" id="scan-file-input" multiple hidden>
+      </div>
+      <div id="scan-out" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- Rules -->
+  <section id="p-rules" role="tabpanel" aria-labelledby="tab-rules" hidden>
+    <div class="card prose">
+      <h2>Safety rules</h2>
+      <ol>
+        <li><b>No external references.</b> No <code>http(s)://</code> in SVG, Deneb specs, HTML, CSS, themes or code; only <code>data:</code> URIs. Schema URLs and the SVG namespace are identifiers, not requests.</li>
+        <li><b>No executable content.</b> No <code>&lt;script&gt;</code>, event handlers, <code>javascript:</code>, <code>&lt;foreignObject&gt;</code>, <code>&lt;iframe&gt;</code>, <code>eval</code>, string timers or <code>innerHTML</code> with data.</li>
+        <li><b>Escape data.</b> XML-escape text placed in SVG or HTML; build JSON with a serializer; double single quotes in PBIR text literals.</li>
+        <li><b>Certified first.</b> Built-in visual, then certified AppSource visuals (Deneb, HTML Content Secure), then your organizational store. Never side-load <code>.pbiviz</code> files or use non-certified builds in production.</li>
+        <li><b>Respect tenant controls.</b> Do not work around "certified visuals only" or other admin settings; ask your admin.</li>
+        <li><b>Keep data out.</b> Work from field names. Never share <code>.pbi/cache.abf</code>, <code>.pbix</code> files or data exports: they contain data.</li>
+        <li><b>No secrets</b> in files, specs or measures.</li>
+        <li><b>Safe edits.</b> Edit PBIP files only with Desktop closed and the project in Git or backed up. Parse and write JSON with code, never by hand-editing escaped text.</li>
+      </ol>
+      <h2>Choosing the chart</h2>
+      <table>
+        <thead><tr><th>Task</th><th>Prefer</th><th>Avoid</th></tr></thead>
+        <tbody>
+          <tr><td>Compare or rank</td><td>Sorted horizontal bar; lollipop or dot plot for many items</td><td>Unsorted bars, pies</td></tr>
+          <tr><td>Trend over time</td><td>Line; column for 12 or fewer periods; sparkline in tables</td><td>Stacked areas with many series</td></tr>
+          <tr><td>Actual vs target or prior year</td><td>Bullet; IBCS variance bars; dumbbell for two points</td><td>Gauges for many items</td></tr>
+          <tr><td>Part of a whole</td><td>100% stacked bar (5 parts or fewer); treemap</td><td>Pie or donut beyond about 5 slices, 3D</td></tr>
+          <tr><td>Distribution</td><td>Histogram, box plot, strip plot</td><td>Averages alone</td></tr>
+          <tr><td>Relationship</td><td>Scatter with trend line</td><td>Dual axes without clear labels</td></tr>
+          <tr><td>Bridge or change</td><td>Waterfall</td><td>Stacked columns</td></tr>
+          <tr><td>Status at a glance</td><td>New card plus SVG mini-trend; KPI visual</td><td>Traffic lights without text</td></tr>
+        </tbody>
+      </table>
+      <h2>Design</h2>
+      <ul>
+        <li>The title states the takeaway; units appear once; format strings are consistent.</li>
+        <li>Bars start at zero; sort meaningfully; label directly instead of using legends where possible.</li>
+        <li>Colour carries meaning: one colour per measure, red and green only for bad and good, no more than 6 categorical colours, never colour alone.</li>
+        <li>Alt text on every visual, sensible tab order, text contrast of at least 4.5:1, and a number next to every SVG image.</li>
+        <li>No more than 8 to 10 visuals per page; aggregate in DAX; measure with Performance Analyzer.</li>
+      </ul>
+      <h2>Before you publish</h2>
+      <ol>
+        <li>Every JSON file parses; PBIR files keep the <code>$schema</code> version your project already uses.</li>
+        <li>The Scan tab finds nothing in the files you changed.</li>
+        <li>Deneb specs compile in the Deneb editor without warnings, and field names match the Values well.</li>
+        <li>SVG measures: Data category is Image URL; the worst case stays well under 32,000 characters (<code>LEN</code>).</li>
+        <li>Reopen the report in Desktop and look at the result.</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span id="version"></span>
+  <span>Templates tested November 2026 (Deneb 2.0.1 / Vega-Lite 6.4.3, PBIR visualContainer 2.9.0–2.13.0)</span>
+</footer>
+<script>{{CORE}}</script>
+<script>{{UI}}</script>
+</body>
+</html>

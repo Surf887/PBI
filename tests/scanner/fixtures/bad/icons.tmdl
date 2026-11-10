@@ -1,0 +1,2 @@
+	measure 'Icon' = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><image xlink:href='data:image/png;base64,AAAA'/><rect style='fill:url(data:text/html,x)'/></svg>"
+		dataCategory: ImageUrl

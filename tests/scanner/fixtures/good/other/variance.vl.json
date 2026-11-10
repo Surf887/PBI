@@ -1,0 +1,153 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "description": "Actual vs prior year with variance %. Fields: Category (column), Actual (measure), PY (measure).",
+  "data": {
+    "name": "dataset"
+  },
+  "width": "container",
+  "height": "container",
+  "autosize": {
+    "type": "fit",
+    "contains": "padding"
+  },
+  "transform": [
+    {
+      "calculate": "datum['Actual'] - datum['PY']",
+      "as": "Variance"
+    },
+    {
+      "calculate": "datum['PY'] ? (datum['Actual'] - datum['PY']) / abs(datum['PY']) : null",
+      "as": "Variance %"
+    },
+    {
+      "calculate": "datum['Variance'] < 0 ? pbiColor('bad') : pbiColor('good')",
+      "as": "__varColor"
+    },
+    {
+      "calculate": "datum['Actual__highlightStatus'] == 'off' || datum['__selected__'] == 'off' ? 0.3 : 1",
+      "as": "__opacity"
+    }
+  ],
+  "encoding": {
+    "y": {
+      "field": "Category",
+      "type": "nominal",
+      "sort": {
+        "field": "Actual",
+        "op": "max",
+        "order": "descending"
+      },
+      "title": null,
+      "axis": {
+        "ticks": false,
+        "domain": false,
+        "labelLimit": 160
+      }
+    },
+    "opacity": {
+      "field": "__opacity",
+      "type": "quantitative",
+      "scale": null,
+      "legend": null
+    },
+    "tooltip": [
+      {
+        "field": "Category",
+        "type": "nominal"
+      },
+      {
+        "field": "Actual",
+        "type": "quantitative",
+        "format": "#,0",
+        "formatType": "pbiFormat"
+      },
+      {
+        "field": "PY",
+        "title": "Prior year",
+        "type": "quantitative",
+        "format": "#,0",
+        "formatType": "pbiFormat"
+      },
+      {
+        "field": "Variance %",
+        "type": "quantitative",
+        "format": "+0.0%;-0.0%;0.0%",
+        "formatType": "pbiFormat"
+      }
+    ]
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "bar",
+        "color": "#C8C6C4",
+        "height": {
+          "band": 0.55
+        },
+        "yOffset": 5
+      },
+      "encoding": {
+        "x": {
+          "field": "PY",
+          "type": "quantitative",
+          "title": null,
+          "axis": {
+            "format": "#,0",
+            "formatType": "pbiFormat",
+            "tickCount": 4
+          }
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "bar",
+        "color": "#404040",
+        "height": {
+          "band": 0.55
+        },
+        "yOffset": -3
+      },
+      "encoding": {
+        "x": {
+          "field": "Actual",
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "dx": 6,
+        "fontSize": 11,
+        "fontWeight": "bold"
+      },
+      "encoding": {
+        "x": {
+          "field": "__labelX",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "Variance %",
+          "type": "quantitative",
+          "format": "+0.0%;-0.0%;0.0%",
+          "formatType": "pbiFormat"
+        },
+        "color": {
+          "field": "__varColor",
+          "type": "nominal",
+          "scale": null,
+          "legend": null
+        }
+      },
+      "transform": [
+        {
+          "calculate": "max(datum['Actual'], datum['PY'])",
+          "as": "__labelX"
+        }
+      ]
+    }
+  ]
+}

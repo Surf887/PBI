@@ -1,0 +1,9 @@
+{
+  "name": "powerbi-visual-builder-tests",
+  "private": true,
+  "description": "Test-only dependencies: Vega and Vega-Lite at the versions bundled in Deneb 2.0.1",
+  "dependencies": {
+    "vega": "6.4.0",
+    "vega-lite": "6.4.3"
+  }
+}

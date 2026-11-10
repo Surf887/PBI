@@ -1,0 +1,4 @@
+node_modules/
+__pycache__/
+*.pyc
+.pbi-visual-builder-backups/
