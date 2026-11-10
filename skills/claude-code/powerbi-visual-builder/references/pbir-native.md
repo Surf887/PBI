@@ -2,7 +2,7 @@
 
 Reference for the `powerbi-visual-builder` skill, loaded when `SKILL.md` section 5 points here. The guardrails (section 1), validation (section 6) and delivery format (section 7) in `SKILL.md` apply to everything in this file, and nothing here overrides them.
 
-Contents: Folder map · Before editing · Minimal `visual.json` · Field references · Literal encoding · Visual types and roles · Adding a visual · Pitfalls
+Contents: Folder map · Before editing · Minimal `visual.json` · Field references · Literal encoding · Visual types and roles · Adding a visual · Pitfalls · Native formatting to try before SVG or Deneb
 
 PBIR (the enhanced report format) is the default report format in Power BI Desktop and the Service as of 2026. A PBIP report folder looks like this:
 
@@ -88,3 +88,19 @@ PBIR (the enhanced report format) is the default report format in Power BI Deskt
 6. Validate (`SKILL.md` section 6), then reload Desktop and check the render.
 
 **Pitfalls that break visuals silently**: `sortDefinition` outside `query`; `visualContainerObjects` outside `visual`; missing `nativeQueryRef`; reused names; wrong role names; mixing `Column`/`Measure`; numbers without `D`/`L`; double-quoted text literals; regex edits and PowerShell `ConvertTo-Json` (default depth 2) mangling JSON (if PowerShell is unavoidable, pass `-Depth 100`); `dataPoint.fill` without a selector (invisible bars; use `defaultColor`); a page not listed in `pages.json`; editing while Desktop holds unsaved changes (Desktop overwrites your edits).
+
+**Native formatting to try before SVG or Deneb** (rung 1; limits from Microsoft Learn, Nov 2026)
+
+- **Data bars and icons** on a table/matrix value column (Format → Cell elements): in-cell magnitude or status with no DAX.
+- **Sparklines** in a table/matrix (open a numeric field's menu in the well → *Add a sparkline*): line or column. Limits: 5 sparklines per visual, 52 points each, and a matrix with sparklines shows at most 25 columns.
+- **Colour by measure**: bar and column colours, and table/matrix background or font colours, can follow a measure that returns a hex code or colour name. Apply it with *fx* → Format style **Field value**. This measure is plain text: leave its Data category unset.
+
+```dax
+Variance Colour =
+VAR _Actual = [Sales Amount]
+VAR _Gap = _Actual - [Sales Target]
+RETURN
+    SWITCH ( TRUE (), ISBLANK ( _Actual ), BLANK (), _Gap >= 0, "#1AAB40", "#D64554" )
+```
+
+Colour never carries the message alone (`SKILL.md` section 4): keep the value, an icon or a label beside it. In PBIR, conditional-formatting objects are verbose: author one in Desktop and copy its shape (`SKILL.md` guardrail 11). Move up to an SVG measure only when these fall short: a target marker on a bar, a labelled pill, a shape natives lack, more than five sparklines, or a micro-chart in a card or slicer.
