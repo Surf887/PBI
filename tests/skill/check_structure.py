@@ -65,7 +65,11 @@ EXPECTED = ["(see section 13)", "Contents: 1 Guardrails", "## 5. Native visuals"
             "## 8. Custom visuals", "## 9. HTML Content", "## 10. Python and R", "## 11. Validation", "## 12. Delivery",
             "## 13. Baseline", "6. Validate (section 11)", "(guardrails 1–2).", "keep guardrails 1–2.", "(guardrail 1)",
             "Only when rung 5 applies (section 3)", "(section 5, step 5)", "Use only when section 3 says so",
-            "2. **Forbidden patterns**", "- Tested:"] + (["6. **Data minimization**"] if VARIANT == "copilot" else [])
+            "2. **Forbidden patterns**", "- Tested:",
+            "**Review or fix requests**", "| 2. SVG measure in a native host", "| Schedule / timeline",
+            "Colour never carries the message alone", "`Start` and `Finish` are date columns",
+            "| SVG column shows text starting", "| SVG tiny or cropped in a table",
+            "| Deneb chart overflows its container", "| PBIR visual missing after reload"] + (["6. **Data minimization**"] if VARIANT == "copilot" else [])
 unexpected = [l for l in changed if not any(e in l for e in EXPECTED)]
 check(f"prose preserved: {len(changed)} intended line edits, none unexpected", not unexpected, [l[:80] for l in unexpected])
 for e in EXPECTED:

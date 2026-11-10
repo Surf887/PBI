@@ -2,7 +2,7 @@
 
 Reference for the `powerbi-visual-builder` skill, loaded when `SKILL.md` section 5 points here. The guardrails (section 1), validation (section 6) and delivery format (section 7) in `SKILL.md` apply to everything in this file, and nothing here overrides them.
 
-Contents: Facts · Authoring rules · Spec 1 ranked lollipop · Spec 2 actual vs prior year · Config · Apply in the UI · Portable template · Embedding in PBIR (Python builder)
+Contents: Facts · Authoring rules · Spec 1 ranked lollipop · Spec 2 actual vs prior year · Spec 3 Gantt · Config · Apply in the UI · Portable template · Embedding in PBIR (Python builder)
 
 **Facts** (Deneb 2.0.1, Oct 2026)
 
@@ -104,6 +104,55 @@ Contents: Facts · Authoring rules · Spec 1 ranked lollipop · Spec 2 actual vs
   ]
 }
 ```
+
+**Spec 3 — Gantt with progress and a today line** (fields `Task`, `Start`, `Finish`, `Progress` as 0–1; one row per task; tested with Vega-Lite 6.4.3 on text dates, date objects, and blank or out-of-range progress)
+
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "data": {"name": "dataset"},
+  "width": "container",
+  "height": "container",
+  "autosize": {"type": "fit", "contains": "padding"},
+  "transform": [
+    {"calculate": "toDate(datum['Start'])", "as": "__start"},
+    {"calculate": "toDate(datum['Finish'])", "as": "__finish"},
+    {"calculate": "time(datum.__start) + (time(datum.__finish) - time(datum.__start)) * clamp(datum['Progress'] || 0, 0, 1)", "as": "__done"},
+    {"calculate": "datum['__selected__'] == 'off' ? 0.3 : 1", "as": "__opacity"}
+  ],
+  "layer": [
+    {
+      "encoding": {
+        "y": {"field": "Task", "type": "nominal", "title": null,
+              "sort": {"field": "__start", "op": "min", "order": "ascending"},
+              "axis": {"ticks": false, "domain": false, "labelLimit": 180}},
+        "x": {"field": "__start", "type": "temporal", "title": null,
+              "axis": {"format": "%b %Y", "tickCount": 6, "grid": true}},
+        "opacity": {"field": "__opacity", "type": "quantitative", "scale": null, "legend": null},
+        "tooltip": [
+          {"field": "Task", "type": "nominal"},
+          {"field": "__start", "title": "Start", "type": "temporal", "format": "%d %b %Y"},
+          {"field": "__finish", "title": "Finish", "type": "temporal", "format": "%d %b %Y"},
+          {"field": "Progress", "title": "Complete", "type": "quantitative", "format": "0%", "formatType": "pbiFormat"}
+        ]
+      },
+      "layer": [
+        {"mark": {"type": "bar", "color": "#C8C6C4", "height": {"band": 0.6}, "cornerRadius": 2},
+         "encoding": {"x2": {"field": "__finish"}}},
+        {"mark": {"type": "bar", "color": {"expr": "pbiColor(0)"}, "height": {"band": 0.6}, "cornerRadius": 2},
+         "encoding": {"x2": {"field": "__done"}}}
+      ]
+    },
+    {
+      "data": {"values": [{}]},
+      "mark": {"type": "rule", "color": "#252423", "strokeDash": [4, 3], "strokeWidth": 1.5},
+      "encoding": {"x": {"datum": {"expr": "now()"}, "type": "temporal"}}
+    }
+  ]
+}
+```
+
+`Start` and `Finish` are date columns, or measures such as the earliest and latest date per task. The coloured bar fills to `Progress`: blank counts as 0 and values are clamped to 0–1. Date axes and tooltips use D3 time formats (`%b %Y`); numbers keep `pbiFormat`. The last layer is the today line: delete it to drop the line, and expect it to stretch the axis when today falls outside the tasks' dates. The inline `values` in that layer is one empty row, not data (`SKILL.md` guardrail 6 still holds).
 
 **Config** (Config tab / `jsonConfig`; Power BI look):
 

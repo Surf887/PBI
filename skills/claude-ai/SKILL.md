@@ -1,6 +1,6 @@
 ---
 name: "powerbi-visual-builder"
-description: "Use when creating, editing or reviewing Power BI visuals in Desktop or PBIP/PBIR files (visual.json, report.json, .tmdl): native visuals, SVG DAX measures (ImageUrl), Deneb Vega-Lite, pbiviz custom visuals, HTML Content, Python/R. Applies security guardrails."
+description: "Use for any Power BI visual work: creating, fixing, reviewing or choosing charts in Power BI Desktop or PBIP/PBIR files (visual.json, report.json, .tmdl). Covers native visuals and conditional formatting, SVG DAX measures (ImageUrl sparklines, bullets, pills), Deneb Vega-Lite (lollipop, variance, Gantt), pbiviz custom visuals, HTML Content, Python/R. Use it even when the user only says chart, KPI card, dashboard page or 'make this table look better' about Power BI. Applies security guardrails."
 ---
 
 # Power BI Visual Builder (secure)
@@ -45,6 +45,8 @@ Infer what you can; ask only for what changes the build (one short question at a
 
 If nothing is said, assume: certified-only tenant, Deneb from AppSource allowed, no Python/R, latest Desktop, mode A. State these assumptions in the answer.
 
+**Review or fix requests** (the user supplies an existing visual, spec, measure or PBIR file): do not rebuild it. Check it against section 1 and section 11, use the symptom table at the end of section 11 for anything broken, and report findings most serious first (security, wrong numbers, does not render, accessibility, design polish), each with the exact fix. Change only what the user asked for and offer the rest as suggestions. Suggest a lower rung of section 3 only when the saving is real (for example an SVG sparkline that a native sparkline would replace).
+
 ---
 
 ## 3. Choose the technology
@@ -53,14 +55,14 @@ Climb the ladder only as far as needed. Lower rungs are faster, more accessible,
 
 | Rung | Use it when | Typical examples | Watch out for |
 |---|---|---|---|
-| 1. Native visual | A core visual (with formatting, conditional formatting, visual calculations, field parameters, small multiples, reference lines, error bars) answers the question | Ranked bar, trend line, matrix with icons, new card (multi-value), KPI, azure map | Too many visuals per page (aim ≤ 8–10) |
-| 2. SVG measure in a native host | A micro-chart belongs **inside** a table/matrix row, new card, image visual or button/list slicer | Bullet, progress bar, sparkline, status pill, variance bar | Static image: no per-mark tooltip/click; per-row DAX cost |
-| 3. Deneb (certified) | A bespoke chart needs tooltips, cross-filtering or cross-highlighting | Lollipop, dumbbell, IBCS variance chart, box/strip plot, heatmap/calendar, annotated line, bump chart | Row window (30,000 rows per load), spec maintainability, needs Vega-Lite skills |
+| 1. Native visual | A core visual (with formatting, conditional formatting (colour by rules, gradient or a colour measure; data bars; icons), table/matrix sparklines, visual calculations, field parameters, small multiples, reference lines, error bars) answers the question | Ranked bar, trend line, matrix with icons, data bars or sparklines, new card (multi-value), KPI, azure map | Too many visuals per page (aim ≤ 8–10) |
+| 2. SVG measure in a native host | A micro-chart belongs **inside** a table/matrix row, new card, image visual or button/list slicer, and native data bars, icons or sparklines cannot draw it (section 5) | Bullet with target marker, labelled progress bar, status pill, variance bar, sparkline where native ones run out | Static image: no per-mark tooltip/click; per-row DAX cost |
+| 3. Deneb (certified) | A bespoke chart needs tooltips, cross-filtering or cross-highlighting | Lollipop, dumbbell, IBCS variance chart, Gantt, box/strip plot, heatmap/calendar, annotated line, bump chart | Row window (30,000 rows per load), spec maintainability, needs Vega-Lite skills |
 | 4. HTML Content **Secure** | Rich text or styled tiles assembled from DAX | Narrative KPI tile, formatted callouts | Sanitized subset only; no scripts |
 | 5. Custom visual (SDK) | A reusable, productized visual across many reports, with an owner and a review/update process | Corporate standard chart, domain-specific diagram | Build, certification-grade review, org-store distribution, ongoing maintenance |
 | 6. Python/R visual | A statistical graphic nothing else can do, a static image is acceptable, tenant and licensing allow it | Regression diagnostics, specialised plots | Static, slow, arbitrary code in Desktop, not supported in embedded (PaaS) reports since 1 May 2026 |
 
-Quick routing: *in-cell graphics* → SVG; *interactive bespoke chart* → Deneb (Vega-Lite first, Vega only for advanced interaction); *formatted text* → HTML Content Secure; *same custom chart in 20 reports* → SDK visual via org store.
+Quick routing: *in-cell graphics* → native data bars, icons or sparklines first, SVG when they fall short; *interactive bespoke chart* → Deneb (Vega-Lite first, Vega only for advanced interaction); *formatted text* → HTML Content Secure; *same custom chart in 20 reports* → SDK visual via org store.
 
 ---
 
@@ -78,6 +80,8 @@ Quick routing: *in-cell graphics* → SVG; *interactive bespoke chart* → Deneb
 | Relationship | Scatter (+ trend line) | Dual axes without clear labels |
 | Bridge / change decomposition | Waterfall | Stacked columns |
 | Status at a glance | New card (multi-value) + SVG mini-trend; KPI visual | Traffic lights without text |
+| Schedule / timeline | Gantt bars with progress and a today line (section 7, spec 3) | A table of dates alone; a different colour for every task |
+| Cumulative progress vs plan | S-curve: cumulative planned, actual and forecast lines on one axis (native line chart with cumulative measures) | Period bars alone; dual axes |
 
 **Design rules**
 
@@ -176,6 +180,22 @@ PBIR (the enhanced report format) is the default report format in Power BI Deskt
 6. Validate (section 11), then reload Desktop and check the render.
 
 **Pitfalls that break visuals silently**: `sortDefinition` outside `query`; `visualContainerObjects` outside `visual`; missing `nativeQueryRef`; reused names; wrong role names; mixing `Column`/`Measure`; numbers without `D`/`L`; double-quoted text literals; regex edits and PowerShell `ConvertTo-Json` (default depth 2) mangling JSON (if PowerShell is unavoidable, pass `-Depth 100`); `dataPoint.fill` without a selector (invisible bars; use `defaultColor`); a page not listed in `pages.json`; editing while Desktop holds unsaved changes (Desktop overwrites your edits).
+
+**Native formatting to try before SVG or Deneb** (rung 1; limits from Microsoft Learn, Nov 2026)
+
+- **Data bars and icons** on a table/matrix value column (Format → Cell elements): in-cell magnitude or status with no DAX.
+- **Sparklines** in a table/matrix (open a numeric field's menu in the well → *Add a sparkline*): line or column. Limits: 5 sparklines per visual, 52 points each, and a matrix with sparklines shows at most 25 columns.
+- **Colour by measure**: bar and column colours, and table/matrix background or font colours, can follow a measure that returns a hex code or colour name. Apply it with *fx* → Format style **Field value**. This measure is plain text: leave its Data category unset.
+
+```dax
+Variance Colour =
+VAR _Actual = [Sales Amount]
+VAR _Gap = _Actual - [Sales Target]
+RETURN
+    SWITCH ( TRUE (), ISBLANK ( _Actual ), BLANK (), _Gap >= 0, "#1AAB40", "#D64554" )
+```
+
+Colour never carries the message alone (section 4): keep the value, an icon or a label beside it. In PBIR, conditional-formatting objects are verbose: author one in Desktop and copy its shape (guardrail 11). Move up to an SVG measure only when these fall short: a target marker on a bar, a labelled pill, a shape natives lack, more than five sparklines, or a micro-chart in a card or slicer.
 
 ---
 
@@ -442,6 +462,55 @@ Community UDF libraries for SVG (e.g. DaxLib.SVG on daxlib.org) can save time: r
   ]
 }
 ```
+
+**Spec 3 — Gantt with progress and a today line** (fields `Task`, `Start`, `Finish`, `Progress` as 0–1; one row per task; tested with Vega-Lite 6.4.3 on text dates, date objects, and blank or out-of-range progress)
+
+```json
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "data": {"name": "dataset"},
+  "width": "container",
+  "height": "container",
+  "autosize": {"type": "fit", "contains": "padding"},
+  "transform": [
+    {"calculate": "toDate(datum['Start'])", "as": "__start"},
+    {"calculate": "toDate(datum['Finish'])", "as": "__finish"},
+    {"calculate": "time(datum.__start) + (time(datum.__finish) - time(datum.__start)) * clamp(datum['Progress'] || 0, 0, 1)", "as": "__done"},
+    {"calculate": "datum['__selected__'] == 'off' ? 0.3 : 1", "as": "__opacity"}
+  ],
+  "layer": [
+    {
+      "encoding": {
+        "y": {"field": "Task", "type": "nominal", "title": null,
+              "sort": {"field": "__start", "op": "min", "order": "ascending"},
+              "axis": {"ticks": false, "domain": false, "labelLimit": 180}},
+        "x": {"field": "__start", "type": "temporal", "title": null,
+              "axis": {"format": "%b %Y", "tickCount": 6, "grid": true}},
+        "opacity": {"field": "__opacity", "type": "quantitative", "scale": null, "legend": null},
+        "tooltip": [
+          {"field": "Task", "type": "nominal"},
+          {"field": "__start", "title": "Start", "type": "temporal", "format": "%d %b %Y"},
+          {"field": "__finish", "title": "Finish", "type": "temporal", "format": "%d %b %Y"},
+          {"field": "Progress", "title": "Complete", "type": "quantitative", "format": "0%", "formatType": "pbiFormat"}
+        ]
+      },
+      "layer": [
+        {"mark": {"type": "bar", "color": "#C8C6C4", "height": {"band": 0.6}, "cornerRadius": 2},
+         "encoding": {"x2": {"field": "__finish"}}},
+        {"mark": {"type": "bar", "color": {"expr": "pbiColor(0)"}, "height": {"band": 0.6}, "cornerRadius": 2},
+         "encoding": {"x2": {"field": "__done"}}}
+      ]
+    },
+    {
+      "data": {"values": [{}]},
+      "mark": {"type": "rule", "color": "#252423", "strokeDash": [4, 3], "strokeWidth": 1.5},
+      "encoding": {"x": {"datum": {"expr": "now()"}, "type": "temporal"}}
+    }
+  ]
+}
+```
+
+`Start` and `Finish` are date columns, or measures such as the earliest and latest date per task. The coloured bar fills to `Progress`: blank counts as 0 and values are clamped to 0–1. Date axes and tooltips use D3 time formats (`%b %Y`); numbers keep `pbiFormat`. The last layer is the today line: delete it to drop the line, and expect it to stretch the axis when today falls outside the tasks' dates. The inline `values` in that layer is one empty row, not data (guardrail 6 still holds).
 
 **Config** (Config tab / `jsonConfig`; Power BI look):
 
@@ -815,6 +884,24 @@ sys.exit(1 if hits else 0)
 6. **Accessibility & design**: alt text, tab order, contrast, not colour-only, title states the point, ≤ 8–10 visuals per page.
 7. **Render check**: reload Desktop (or the Service) and look at the result; for PBIR edits use the Desktop reload/screenshot tooling only when Desktop has no unsaved changes.
 
+**When something does not render** (first cause listed is the most common)
+
+| Symptom | Likely cause → fix |
+|---|---|
+| SVG column shows text starting `data:image/svg+xml` | Data category is not Image URL (section 6) |
+| SVG blank or broken for some users or rows only | Decimal comma in a coordinate → `FORMAT ( x, "0.0", "en-US" )`; unescaped `&` or `<` in data text → template E; string over ~32K → shorten |
+| SVG colours missing | Pre-encoded `%23` in a measure → plain `#`; where the URI is used as-is → `rgb()` |
+| SVG tiny or cropped in a table | Image size not set to the SVG's width and height (section 6, wiring) |
+| Deneb draws nothing, or only axes | A field name in the spec differs from the display name in *Values* (check Deneb's Data tab; `\ " . [ ]` become `_`) |
+| Deneb chart overflows its container | `container` sizing or `autosize` fit missing (section 7) |
+| Clicking a Deneb mark does not filter other visuals | Cross-filtering is off in Deneb's settings; marks are aggregated without their grouping fields; or Edit interactions is set to None for the target visual |
+| Deneb sort ignored in a layered chart | A `sum` sort was dropped on a shared axis → `"op": "max"` |
+| PBIR visual missing after reload, or Desktop reports a broken file | Section 5 pitfalls: most often a misplaced `sortDefinition` or `visualContainerObjects`, a reused `name`, or a page missing from `pages.json` → validate against the declared `$schema` |
+| PBIR edits vanished | Desktop was open with unsaved changes and overwrote them → close it, restore from git, re-apply |
+| Custom visual blocked or not offered | The tenant allows certified visuals only, or the visual is not in the org store → ask the admin; never work around it (guardrail 5) |
+
+If the cause is not in this table, say what you checked and what the user should capture (the exact error text, Deneb's log pane, Performance Analyzer). Do not guess (guardrail 11).
+
 ---
 
 ## 12. Delivery format
@@ -832,5 +919,6 @@ Answer with:
 ## 13. Baseline and sources (November 2026)
 
 - Baseline: PBIR is the default report format; newest `visualContainer` schema 2.13.0 (always copy the project's); Deneb 2.0.1 (certified; Vega 6.4.0 / Vega-Lite 6.4.3; 30,000-row window); DAX UDFs GA June 2026 (compatibility level 1702+); `powerbi-visuals-tools` 7.2.1 (Node >= 20.19) with API 5.11.1; embedded R/Python support ended 1 May 2026.
-- Sources: Microsoft Learn (PBIP/PBIR, DAX UDFs, certified visuals, Python visuals), `microsoft/json-schemas`, `deneb.guide` and the Deneb source, the HTML Content source and `html-content.com`, DaxLib.SVG 2.0.0, Microsoft `skills-for-fabric` (MIT). `data-goblin/power-bi-agentic-development` (GPL-3.0) was consulted only; no text copied.
-- Tested: Deneb specs compiled and rendered with Vega-Lite 6.4.3 (labels stay inside the view under fit sizing); PBIR examples validated against `visualContainer` 2.9.0 and 2.13.0; SVG outputs parsed and rendered; the SDK skeleton passed ESLint and `pbiviz package --certification-audit`; the Python script ran on sample and empty data; the scanner passed 23 targeted false-positive/false-negative cases plus a 56-case regression set, and also checks CSS/LESS/TSX/JSX files.
+- Re-checked 10 Nov 2026: Deneb 2.0.1.0 is the newest release tag; `powerbi-visuals-tools` 7.2.1 and `powerbi-visuals-api` 5.11.1 are the newest on npm. npm's newest Vega-Lite is 6.5.0: write and test against the version Deneb bundles (6.4.3), not npm's latest.
+- Sources: Microsoft Learn (PBIP/PBIR, DAX UDFs, certified visuals, Python visuals, sparklines, conditional formatting), `microsoft/json-schemas`, `deneb.guide` and the Deneb source, the HTML Content source and `html-content.com`, DaxLib.SVG 2.0.0, Microsoft `skills-for-fabric` (MIT). `data-goblin/power-bi-agentic-development` (GPL-3.0) was consulted only; no text copied.
+- Tested: Deneb specs compiled and rendered with Vega-Lite 6.4.3 (labels stay inside the view under fit sizing); PBIR examples validated against `visualContainer` 2.9.0 and 2.13.0; SVG outputs parsed and rendered; the SDK skeleton passed ESLint and `pbiviz package --certification-audit`; the Python script ran on sample and empty data; the scanner passed 23 targeted false-positive/false-negative cases plus a 56-case regression set, and also checks CSS/LESS/TSX/JSX files. Deneb spec 3 compiled without warnings and rendered with Vega-Lite 6.4.3 / Vega 6.4.0 (10 Nov 2026). Not yet run in Desktop: the colour measure in section 5 and the symptom table in section 11, which are written from Microsoft Learn and the rules in this file.

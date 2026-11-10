@@ -44,9 +44,9 @@ REFS = """## 5. Reference files (read only what the task needs)
 
 | Read | When the task involves | Inside |
 |---|---|---|
-| [references/pbir-native.md](references/pbir-native.md) | Mode B: editing PBIP/PBIR files (`visual.json`, `report.json`, `pages.json`), adding or registering any visual | Folder map, before-editing checks, minimal `visual.json`, field references, literal encoding, visual types and roles, steps to add a visual, pitfalls |
+| [references/pbir-native.md](references/pbir-native.md) | Mode B: editing PBIP/PBIR files (`visual.json`, `report.json`, `pages.json`), adding or registering any visual; also rung 1 formatting to try before SVG (data bars, icons, sparklines, colour by measure) | Folder map, before-editing checks, minimal `visual.json`, field references, literal encoding, visual types and roles, steps to add a visual, pitfalls, native formatting to try first |
 | [references/svg-measures.md](references/svg-measures.md) | Rung 2: micro-charts inside a table, matrix, card, image or slicer | SVG rules; templates A bullet, B progress bar, C sparkline, D status pill, E escaping UDF; wiring into hosts |
-| [references/deneb.md](references/deneb.md) | Rung 3: a bespoke interactive chart | Deneb 2.x facts, authoring rules, lollipop and variance specs, config, UI steps, portable template, Python builder for PBIR |
+| [references/deneb.md](references/deneb.md) | Rung 3: a bespoke interactive chart | Deneb 2.x facts, authoring rules, lollipop, variance and Gantt specs, config, UI steps, portable template, Python builder for PBIR |
 | [references/custom-visual-sdk.md](references/custom-visual-sdk.md) | Rung 5, mode C: a `pbiviz` project | Pinned toolchain and commands, `capabilities.json`, secure coding rules, `src/visual.ts` skeleton, distribution |
 | [references/html-and-python.md](references/html-and-python.md) | Rung 4 (HTML Content Secure) or rung 6 (Python/R) | Visual GUIDs, KPI tile DAX, Python/R limits, matplotlib template |
 | [scripts/scan_visuals.py](scripts/scan_visuals.py) | Every delivery (section 6, step 2) | Read-only forbidden-pattern scan: run it, don't load it |
@@ -71,6 +71,20 @@ base_title, base = sections[13]
 base = rep(base, "the scanner passed 23 targeted false-positive/false-negative cases plus a 56-case regression set, and also checks CSS/LESS/TSX/JSX files.",
            "the scanner passed 23 targeted false-positive/false-negative cases; `scripts/scan_visuals.py` (the same code as the single-file version's scanner) passed a 56-case regression set plus checks for missing paths, empty folders, UTF-16/CRLF files and non-UTF-8 consoles.")
 
+# cross-references that point at sections moved or renumbered in the folder build
+s2 = rep(sections[2][1], "Check it against section 1 and section 11, use the symptom table at the end of section 11",
+         "Check it against section 1 and section 6, use the symptom table at the end of section 6")
+s3 = rep(sections[3][1], "sparklines cannot draw it (section 5)",
+         "sparklines cannot draw it (`references/pbir-native.md`, *Native formatting*)")
+s4 = rep(sections[4][1], "(section 7, spec 3)", "(`references/deneb.md`, spec 3)")
+sections[2], sections[3], sections[4] = (sections[2][0], s2), (sections[3][0], s3), (sections[4][0], s4)
+val = rep(val, "Data category is not Image URL (section 6)", "Data category is not Image URL (`references/svg-measures.md`)")
+val = rep(val, "(section 6, wiring)", "(`references/svg-measures.md`, *Wiring into hosts*)")
+val = rep(val, "fit missing (section 7)", "fit missing (`references/deneb.md`)")
+val = rep(val, "| Section 5 pitfalls: most often", "| `references/pbir-native.md` pitfalls: most often")
+base = rep(base, "the colour measure in section 5 and the symptom table in section 11",
+           "the colour measure in `references/pbir-native.md` and the symptom table in section 6")
+
 skill_md = (frontmatter + pre
             + "\n---\n\n".join([section(1), section(2), section(3), section(4), REFS,
                                 f"## 6. {val_title}\n\n{val}", section(12, 7), f"## 8. {base_title}\n\n{base}"]))
@@ -87,11 +101,14 @@ def ref(title, contents, body):
 
 t5, c5 = sections[5]
 c5 = rep(c5, "6. Validate (section 11), then", "6. Validate (`SKILL.md` section 6), then")
+c5 = rep(c5, "Colour never carries the message alone (section 4)", "Colour never carries the message alone (`SKILL.md` section 4)")
+c5 = rep(c5, "and copy its shape (guardrail 11).", "and copy its shape (`SKILL.md` guardrail 11).")
 t6, c6 = sections[6]
 c6 = rep(c6, "external `href`s or web fonts (guardrails 1–2).", "external `href`s or web fonts (`SKILL.md` guardrails 1–2).")
 c6 = rep(c6, "and keep guardrails 1–2.", "and keep `SKILL.md` guardrails 1–2.")
 t7, c7 = sections[7]
 c7 = rep(c7, "(guardrail 1)", "(`SKILL.md` guardrail 1)")
+c7 = rep(c7, "(guardrail 6 still holds)", "(`SKILL.md` guardrail 6 still holds)")
 t8, c8 = sections[8]
 c8 = rep(c8, "Only when rung 5 applies (section 3).", "Only when rung 5 applies (`SKILL.md` section 3).")
 c8 = rep(c8, "(section 5, step 5)", "(`pbir-native.md`, *Adding a visual*, step 5)")
@@ -101,9 +118,9 @@ c10 = rep(c10, "Use only when section 3 says so", "Use only when `SKILL.md` sect
 
 files = {
     "SKILL.md": skill_md,
-    "references/pbir-native.md": ref(t5, "Folder map · Before editing · Minimal `visual.json` · Field references · Literal encoding · Visual types and roles · Adding a visual · Pitfalls", c5),
+    "references/pbir-native.md": ref(t5, "Folder map · Before editing · Minimal `visual.json` · Field references · Literal encoding · Visual types and roles · Adding a visual · Pitfalls · Native formatting to try before SVG or Deneb", c5),
     "references/svg-measures.md": ref(t6, "Rules · A Bullet · B Progress bar · C Sparkline · D Status pill · E Escaping data-driven text (UDF) · Wiring into hosts", c6),
-    "references/deneb.md": ref(t7, "Facts · Authoring rules · Spec 1 ranked lollipop · Spec 2 actual vs prior year · Config · Apply in the UI · Portable template · Embedding in PBIR (Python builder)", c7),
+    "references/deneb.md": ref(t7, "Facts · Authoring rules · Spec 1 ranked lollipop · Spec 2 actual vs prior year · Spec 3 Gantt · Config · Apply in the UI · Portable template · Embedding in PBIR (Python builder)", c7),
     "references/custom-visual-sdk.md": ref(t8, "Toolchain · `capabilities.json` essentials · Secure coding rules · Skeleton `src/visual.ts` · Distribution", c8),
     "references/html-and-python.md": ref("HTML Content Secure and Python/R visuals",
                                          "HTML Content Secure (rung 4) · Python and R visuals (rung 6, last resort)",
