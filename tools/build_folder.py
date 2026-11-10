@@ -82,8 +82,8 @@ val = rep(val, "Data category is not Image URL (section 6)", "Data category is n
 val = rep(val, "(section 6, wiring)", "(`references/svg-measures.md`, *Wiring into hosts*)")
 val = rep(val, "fit missing (section 7)", "fit missing (`references/deneb.md`)")
 val = rep(val, "| Section 5 pitfalls: most often", "| `references/pbir-native.md` pitfalls: most often")
-base = rep(base, "the colour measure in section 5 and the symptom table in section 11",
-           "the colour measure in `references/pbir-native.md` and the symptom table in section 6")
+base = rep(base, "the section 5 colour measure", "the colour measure in `references/pbir-native.md`")
+base = rep(base, "the symptom table in section 11", "the symptom table in section 6")
 
 skill_md = (frontmatter + pre
             + "\n---\n\n".join([section(1), section(2), section(3), section(4), REFS,
